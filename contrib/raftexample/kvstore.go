@@ -39,8 +39,11 @@ type kv struct {
 	Val string
 }
 
+// newKVStore 初始化一个kv 保存容器
 func newKVStore(snapshotter *snap.Snapshotter, proposeC chan<- string, commitC <-chan *commit, errorC <-chan error) *kvstore {
+
 	s := &kvstore{proposeC: proposeC, kvStore: make(map[string]string), snapshotter: snapshotter}
+	// 加载之前的快照
 	snapshot, err := s.loadSnapshot()
 	if err != nil {
 		log.Panic(err)
@@ -51,7 +54,7 @@ func newKVStore(snapshotter *snap.Snapshotter, proposeC chan<- string, commitC <
 			log.Panic(err)
 		}
 	}
-	// read commits from raft into kvStore map until error
+	// 后台异步读取commitc channel的数据 ，写入到 kv store
 	go s.readCommits(commitC, errorC)
 	return s
 }
@@ -72,6 +75,7 @@ func (s *kvstore) Propose(k string, v string) {
 }
 
 func (s *kvstore) readCommits(commitC <-chan *commit, errorC <-chan error) {
+	// for 一直进行读取
 	for commit := range commitC {
 		if commit == nil {
 			// signaled to load snapshot

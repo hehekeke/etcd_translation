@@ -100,7 +100,7 @@ func (h *httpKVAPI) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// serveHTTPKVAPI starts a key-value server with a GET/PUT API and listens.
+// 开始开启一个对外访问的api接口
 func serveHTTPKVAPI(kv *kvstore, port int, confChangeC chan<- raftpb.ConfChange, errorC <-chan error) {
 	srv := http.Server{
 		Addr: ":" + strconv.Itoa(port),
